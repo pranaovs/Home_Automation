@@ -1,8 +1,10 @@
-us #include <Blynk.h>
+#include "secrets.h"
+
+#include <Blynk.h>
 #define BLYNK_PRINT Serial
 
 #include <ESP8266WiFi.h>
-#include <BlynkSimpleEsp8266.h>ji
+#include <BlynkSimpleEsp8266.h>
 
 const int HallPin = 5; //The pin connected to the light in your Hall - 1
 const int KitchenPin = 4; //The pin connected to the light in your Kitchen - 2
@@ -10,9 +12,11 @@ const int StudyRoomPin = 0; //The pin connected to the light in your StudyRoom -
 const int BedRoomPin = 2; //The pin connected to the light in your BedRoom - 4
 const int BedRoomFanPin = 14; //The pin connected to the fan in your BedRoom - 5
 
-char auth[] = SECRET_AUTH;
+//Please enter your secrets in the "secrets.h" tab
+char auth[] = SECRET_AUTH; 
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
+//////////////////////////////////////////////////
 
 BLYNK_WRITE(V1) {
 
