@@ -6,6 +6,8 @@ Relay------------------------Digital 4
 
 Servo------------------------Digital 3
 
+//RFID Sensor//
+
 SDA/SS------------------------Digital 10
 
 SCK------------------------Digital 13
