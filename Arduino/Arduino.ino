@@ -1,24 +1,30 @@
+#include "secrets.h"
+
 #include <Servo.h>
 Servo Door;
 #define OpenAngle 170
 #define CloseAngle 75
 #define servopin 3
 
-#include <SPI.h>
-
 #include <MFRC522.h>
 #define SS_PIN 10
 #define RST_PIN 9
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+#include <SPI.h>
 
 const int StreetLight = 4;
+const int btnpin = 5;
+int StreetLightStatus = 0;
 
 int LDR;
+int rev;
+int btn;
+int people = 0;
 
 void setup() {
 
   pinMode(StreetLight, OUTPUT);
-  pinMode(LDR, INPUT);
+  pinMode(btnpin, INPUT);
 
   Door.attach(servopin);
 
@@ -33,22 +39,65 @@ void setup() {
 void loop() {
 
   LDR = analogRead(A0);
+  btn = digitalRead(btnpin);
+
+  if (btn == 1) {
+    if (people > 0) {
+      Door.attach(servopin);
+      DoorOpen();
+      people = people - 1;
+      Serial.println('3');
+      delay(2000);
+      DoorClose();
+      delay(1000);
+      Door.detach();
+    }
+
+    else if (people == 0) {
+      Door.attach(servopin);
+      DoorOpen();
+      delay(2000);
+      DoorClose();
+      delay(1000);
+      Door.detach();
+    }
+  }
 
   if (LDR <= 25) {
-    digitalWrite(StreetLight, HIGH);
+    if (StreetLightStatus == 0) {
+      digitalWrite(StreetLight, HIGH);
+      Serial.println('4');
+    }
+    StreetLightStatus = 1;
   }
 
   else if (LDR >= 35) {
-
-    digitalWrite(StreetLight, LOW);
+    if (StreetLightStatus == 1) {
+      digitalWrite(StreetLight, LOW);
+      Serial.println('5');
+    }
+    StreetLightStatus = 0;
   }
 
-  // Look for new cards
+  if (Serial.available() > 0) {
+    rev = Serial.read();
+    if (rev == '2') {
+      if (people > 0) {
+        Door.attach(servopin);
+        DoorOpen();
+        people = people - 1;
+        delay(2000);
+        DoorClose();
+        delay(1000);
+      }
+    }
+  }
+
   if ( ! mfrc522.PICC_IsNewCardPresent())
   {
     return;
   }
-  // Select one of the cards
+
   if ( ! mfrc522.PICC_ReadCardSerial())
   {
     return;
@@ -56,6 +105,7 @@ void loop() {
 
   String content = "";
   byte letter;
+
   for (byte i = 0; i < mfrc522.uid.size; i++)
   {
     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
@@ -63,15 +113,18 @@ void loop() {
   }
 
   content.toUpperCase();
-  if (content.substring(1) == "D5 8A B8 73")  {
+
+  if (content.substring(1) == "SECRET_RFID")  {
     Door.attach(servopin);
     DoorOpen();
-    Serial.println("Door Open Processed");
-    delay(5000);
+    Serial.println('1');
+    people = people + 1;
+    delay(2000);
     DoorClose();
     delay(1000);
     Door.detach();
   }
+
 }
 
 void DoorOpen()  {
