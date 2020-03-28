@@ -1,2 +1,2 @@
 # Home_Automation
-Home Automation Project using NodeMCU and Arduino using Blynk
+Home Automation Project using NodeMCU and Arduino through Blynk
